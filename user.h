@@ -13,7 +13,7 @@ class user {
 public:
     user();
     ~user();
-    void loginUser();
+    bool loginUser();
     void requestPaymentDetails();
     void payBasket(basket &basket);
     virtual void sendTicketByEmail() {};
@@ -51,7 +51,7 @@ bool user::validatePassword(string value) {
 }
 
 // Customer log in
-void user::loginUser() {
+bool user::loginUser() {
     string usernameInput;
     string passwordInput;
 
@@ -76,10 +76,11 @@ void user::loginUser() {
 
         if (validatePassword(passwordInput)) {
             cout << "\n~~~~~~ Login was successful, welcome " << usernameInput << " ~~~~~~\n" << endl;
-            break;
+            return true;
         }
         cout << "The password is incorrect, you have " << i - 1 << " more attempt(s)." << endl;
     }
+    return false;
 }
 
 void user::requestPaymentDetails() {

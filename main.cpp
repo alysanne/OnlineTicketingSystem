@@ -33,7 +33,13 @@ int main() {
     }
 
     // Login and request personal details
-    appUser.loginUser();
+    bool userLogged = appUser.loginUser();
+
+    if (!userLogged) {
+        cout << "\n~~~~~ Your login has failed, please try again later ~~~~~" << endl;
+        return EXIT_SUCCESS;
+    }
+
     appUser.confirmUserDetails();
 
     // OTS main menu
