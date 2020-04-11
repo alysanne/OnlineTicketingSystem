@@ -42,7 +42,7 @@ ticket::~ticket() {}
 void ticket::generateTicket() {
     cout << "Show: " << show.getShowDetails() << endl;
     cout << "Seat: Row " << seat.getSeatRow() << ", Seat No. " << seat.getSeatNumber() << endl;
-    cout << "Price: £" << seat.getSeatPrice() << endl;
+    cout << "Price: £" << price << endl;
     cout << "Ticket owner: " << user.getFullName() << endl;
 }
 
