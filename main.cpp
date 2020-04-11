@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include "seat.h"
 #include "ticket.h"
 #include "consumer.h"
 #include "show.h"
@@ -8,8 +7,8 @@
 string getLoginType();
 string getMainMenuSelection();
 void showSelection(string &selectedShow, string &selectedShowDate, show &show);
-
-void interactiveSeatSelection(int numSeats, seat &seat);
+void interactiveSeatSelection(int numSeats, show &show);
+void generateAndSendTickets(consumer &appUser, show &show);
 
 using namespace std;
 
@@ -19,10 +18,8 @@ int main() {
     int numSeats;
 
     // Objects
-    seat seat;
     consumer appUser;
     show show;
-    ticket *ticket;
 
     // Get user type
     loginType = getLoginType();
@@ -42,7 +39,7 @@ int main() {
 
     // Log user out
     if (userSelection == "2") {
-        cout << "~~~~~ You have been logged out, thank you for using our application! ~~~~~" << endl;
+        cout << "\n~~~~~ You have been logged out, thank you for using our application! ~~~~~" << endl;
         return EXIT_SUCCESS;
     }
 
@@ -50,22 +47,47 @@ int main() {
     showSelection(selectedShow, selectedShowDate, show);
 
     // Select a seat
-    seat.initialiseFloorPlan();
-    numSeats = seat.getNumSeats();
-    interactiveSeatSelection(numSeats, seat); // TODO: Add seat price to rows + display total price
+    show.initialiseFloorPlan();
+    numSeats = show.requestNumSeats();
+    interactiveSeatSelection(numSeats, show);
 
-    // TODO: Pay for seats and generate + send tickets
+    // Confirm and pay
+    show.confirmSeatSelection();
+
+    // Pay for tickets
+    appUser.requestPaymentDetails();
+    appUser.payBasket(show);
+
+    // Send tickets
+    generateAndSendTickets(appUser, show);
+
+    cout << "~~~~~ Thank you for using the Online Ticketing System to purchase show tickets ~~~~~" << endl;
 
     return 0;
 }
 
-void interactiveSeatSelection(int numSeats, seat &seat) {
+void generateAndSendTickets(consumer &appUser, show &show) {
+    cout << "\n========================================================================" << endl;
+    cout << "============================= Your tickets =============================" << endl;
+    cout << "========================================================================\n" << endl;
+
+    for (int i = 0; i < show.getNumSeats(); i++) {
+        deque<seat> seats = show.getSeatSelection();
+        ticket issuedTicket = ticket(seats[i], show, appUser, seats[i].getSeatPrice());
+        issuedTicket.generateTicket();
+        issuedTicket.sendTicket();
+    }
+}
+
+void interactiveSeatSelection(int numSeats, show &show) {
     string input;
     do {
         for (int i = 0; i < numSeats; i++) {
-            seat.displayFloorPlan();
-            seat.getSeatSelection();
+            show.showAvailableSeats();
+            show.selectSeatsForShow();
         }
+
+        show.displaySeatSelection();
 
         do {
             cout << "\nAre you happy with your choice (Y = Yes, N = No)? ";
@@ -73,7 +95,7 @@ void interactiveSeatSelection(int numSeats, seat &seat) {
         } while (input != "Y" && input != "y" && input != "N" && input != "n");
 
         if (input == "N" || input == "n") {
-            seat.undoSeatSelection();
+            show.undoSeatSelection();
         }
     } while (input == "N" || input == "n");
 }

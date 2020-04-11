@@ -15,6 +15,7 @@ public:
     void printUpdateOptions();
     void updateUserDetails();
     void sendTicketByEmail();
+    string getFullName();
 protected:
     string firstName;
     string lastName;
@@ -44,7 +45,7 @@ void consumer::confirmUserDetails() {
     cout << "Email: " << emailAddress << endl;
 
     do {
-        cout << "\nAre these details correct? (Y = Yes, N = No):" << endl;
+        cout << "\nAre these details correct? (Y = Yes, N = No): ";
         getline(cin, input);
     } while (input != "Y" && input != "y" && input != "N" && input != "n");
 
@@ -56,7 +57,8 @@ void consumer::confirmUserDetails() {
 }
 
 void consumer::sendTicketByEmail() {
-    cout << "Ticket sent by email" << endl;
+    cout << "Ticket sent to email address: " << emailAddress << endl;
+    cout << "------------------------------------------------------------------------" << endl;
 }
 
 void consumer::updateUserDetails() {
@@ -98,11 +100,15 @@ void consumer::updateUserDetails() {
 
 void consumer::printUpdateOptions() {
     cout << "Please select one of the options below: " << endl;
-    cout << " 1. Update first name: " << this->firstName << endl;
-    cout << " 2. Update last name: " << this->lastName << endl;
-    cout << " 3. Update email address: " << this->emailAddress << endl;
+    cout << " 1. Update first name: " << firstName << endl;
+    cout << " 2. Update last name: " << lastName << endl;
+    cout << " 3. Update email address: " << emailAddress << endl;
     cout << " 4. Exit\n" << endl;
     cout << "Type the option selected: ";
+}
+
+string consumer::getFullName() {
+    return firstName + " " + lastName;
 }
 
 #endif //OTS_CONSUMER_H
