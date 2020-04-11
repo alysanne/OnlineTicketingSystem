@@ -3,6 +3,7 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include "seat.h"
 
 using namespace std;
 
@@ -13,16 +14,11 @@ public:
     void selectShow(string &showName, string &showDate);
     void selectTime(string &showTime);
     string getShowDetails();
-    float getTotalPrice();
-    void displaySeatSelection();
-    void confirmSeatSelection();
     void initialiseFloorPlan();
-    int requestNumSeats();
-    int getNumSeats();
     void showAvailableSeats();
-    void selectSeatsForShow();
-    void undoSeatSelection();
-    deque<seat> getSeatSelection();
+    seat getSelectedSeat(string row, string number);
+    void deselectSeat(seat selectedSeat);
+    void selectSeat(seat selectedSeat);
 protected:
     string shows [5][2] = {
             {"Les Miserables", "20/04/2020"},
@@ -39,10 +35,6 @@ protected:
     int numSeatsPerRow;
     seat floorPlan[5][6];
     float rowPrices [5] = {50.00, 47.50, 35.00, 25.00, 15.00};
-    int numSeats;
-    int maxSeats;
-    float totalPrice;
-    deque<seat> seatSelection;
 };
 
 // Constructor
@@ -50,11 +42,8 @@ show::show() {
     showName = "";
     date = "";
     time = "";
-    numSeats = 0;
-    maxSeats = 4;
     numSeatsPerRow = 6;
     numRows = 5;
-    totalPrice = 0;
 }
 
 // Destructor
@@ -118,24 +107,6 @@ string show::getShowDetails() {
     return showName + " on the " + date + " at " + time;
 }
 
-float show::getTotalPrice() {
-    return totalPrice;
-}
-
-void show::confirmSeatSelection() {
-    string input;
-    cout << "You have reserved seats for " << getShowDetails() << endl;
-
-    do {
-        cout << "Do you wish to continue with the purchase of tickets? (Yes = Y, No = N): ";
-        getline(cin, input);
-
-        if (input == "N" || input == "n") {
-            cout << "\n~~~~~ Your purchase has been cancelled, please start a new session to purchase tickets for a new show ~~~~~";
-        }
-    } while (input != "Y" && input != "y" && input != "N" && input != "n");
-}
-
 // Initialise theatre floor plan
 void show::initialiseFloorPlan() {
     // Initialise floor plan seats as available
@@ -145,34 +116,6 @@ void show::initialiseFloorPlan() {
             floorPlan[i][j] = newSeat;
         }
     }
-}
-
-// Get the user's no. of seat
-int show::requestNumSeats() {
-    string input;
-
-    cout << "\n============================================" << endl;
-    cout << "========== Select number of seats ==========" << endl;
-    cout << "============================================\n" << endl;
-
-    do {
-        cout << "How many tickets would you like to purchase (Max. " << maxSeats << "): "; // prompt users to enter number of tickets
-        getline(cin, input);
-
-        try {
-            numSeats = stoi(input);
-        } catch (invalid_argument) {
-            continue;
-        } catch (out_of_range) {
-            continue;
-        }
-    } while (numSeats != 1 && numSeats != 2 && numSeats != 3 && numSeats != 4);
-
-    return numSeats;
-}
-
-int show::getNumSeats() {
-    return numSeats;
 }
 
 void show::showAvailableSeats() {
@@ -198,73 +141,20 @@ void show::showAvailableSeats() {
     cout << "S - Seat sold" << endl;
 }
 
-void show::selectSeatsForShow() {
-    string row, number;
-    bool seatReserved = false;
+void show::deselectSeat(seat selectedSeat) {
+    floorPlan[selectedSeat.getSeatRow() - 1][selectedSeat.getSeatNumber() - 1].setSeatStatus("A");
 
-    do {
-        cout << "\n~~~~~ Please select your seat ~~~~~" << endl;
-        cout << "Seat row: ";
-        getline(cin, row);
-
-        while (row != "1" && row != "2" && row != "3" && row != "4" && row != "5") {
-            cout << "Type a valid row: ";
-            getline(cin, row);
-        }
-
-        cout << "Seat number: ";
-        getline(cin, number);
-
-        while (number != "1" && number != "2" && number != "3" && number != "4" && number != "5" && number != "6") {
-            cout << "Type a valid seat number: ";
-            getline(cin, number);
-        }
-
-        int rowNum = stoi(row) - 1;
-        int seatNum = stoi(number) - 1;
-        seat selectedSeat = floorPlan[rowNum][seatNum];
-
-        // Check seat status
-        if (selectedSeat.getSeatStatus() != "A") {
-            cout << "\n~~~~~ This seat is not available, please try again ~~~~~" << endl;
-        } else {
-            cout << "\n~~~~~ Seat reserved: Row " << row << " - Seat no. " << number << " ~~~~~" << endl;
-            floorPlan[rowNum][seatNum].setSeatStatus("H");
-            seatSelection.push_back(selectedSeat);
-            seatReserved = true;
-        }
-    } while (!seatReserved);
 }
 
-void show::displaySeatSelection() {
-    cout << "\n================================================" << endl;
-    cout << "================== Your seats ==================" << endl;
-    cout << "================================================" << endl;
+void show::selectSeat(seat selectedSeat) {
+    floorPlan[selectedSeat.getSeatRow() - 1][selectedSeat.getSeatNumber() - 1].setSeatStatus("H");
 
-    for (int i = 0; i < seatSelection.size(); i++) {
-        seat seat = seatSelection[i];
-
-        cout << "\n-- Seat " << i + 1 << " --" << endl;
-        seat.getSeatDetails();
-
-        totalPrice += seat.getSeatPrice();
-    }
-
-    cout << "\nTotal price: £" << totalPrice << endl;
 }
 
-deque<seat> show::getSeatSelection() {
-    return seatSelection;
-}
-
-// Remove selected seats if user cancels
-void show::undoSeatSelection() {
-    while (!seatSelection.empty()) {
-        seat selectedSeat = seatSelection.front();
-
-        floorPlan[selectedSeat.getSeatRow() - 1][selectedSeat.getSeatNumber() - 1].setSeatStatus("A");
-        seatSelection.pop_front();
-    }
+seat show::getSelectedSeat(string row, string number) {
+    int rowNum = stoi(row) - 1;
+    int seatNum = stoi(number) - 1;
+    return floorPlan[rowNum][seatNum];
 }
 
 #endif //OTS_SHOW_H

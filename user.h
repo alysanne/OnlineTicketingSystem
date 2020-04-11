@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <string>
 #include "show.h"
+#include "basket.h"
 
 using namespace std;
 
@@ -14,8 +15,7 @@ public:
     ~user();
     void loginUser();
     void requestPaymentDetails();
-    void payBasket(show &show);
-    virtual void saveUserDetails() {};
+    void payBasket(basket &basket);
     virtual void sendTicketByEmail() {};
 protected:
     string userName;
@@ -83,15 +83,15 @@ void user::loginUser() {
 }
 
 void user::requestPaymentDetails() {
-    string cardNumber;
-    requestInput(cardNumber, "Please provide your payment card number: ");
+    string card;
+    requestInput(card, "Please provide your payment card number: ");
 
-    this -> cardNumber = cardNumber;
+    this -> cardNumber = card;
 }
 
-void user::payBasket(show &show) {
+void user::payBasket(basket &basket) {
     cout << "\n~~~~~~ Processing payment for items ~~~~~~" << endl;
-    cout << "\nCard number " << cardNumber << " will be charged £" << show.getTotalPrice() << endl;
+    cout << "\nCard number " << cardNumber << " will be charged £" << basket.getTotalPrice() << endl;
     cout << ". . ." << endl;
     cout << ". . ." << endl;
     cout << ". . ." << endl;
